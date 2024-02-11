@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;500;700&display=swap');
+
+/* VARIABLES */
+:root {
+  --background: white;
+  --color: black;
+  --invert: 0;
+}
+[data-theme='dark'] {
+  --background: black;
+  --color: white;
+  --invert: 1;
+
+}
+/* VARIABLES */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+}
+
+.app {
+  background-color: var(--background);
+  color: var(--color);
+  height: calc(100vh);
+  transition: all 0.3s ease;
+}
+
+.container {
+  width: 800px;
+  margin: 0 auto;
+  padding-top: 30px;
+}
+
+.title {
+  font-weight: 900;
+  font-size: 50px;
+  margin-bottom: 25px;
+}
+.settings-column {
+  display: flex;
+  flex-direction: column;
+  height: 120px;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+.settings-column .checkbox label {
+  color: var(--color);
+  transition: 0.3s ease;
+}
+.passwords-list {
+  padding-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.passwords-list .title {
+  font-size: 28px;
+}
+.password {
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: 0.35s ease;
+  padding: 10px;
+  display: inline-block;
+}
+.password:hover {
+  color: #d4d4d4;
+  background-color: #0b6bcb;
+  border-radius: 6px;
+}
+
+.alert {
+  margin-top: 50px;
+}
+.alert-enter {
+  opacity: 0;
+  transform: scale(0.9);
+}
+.alert-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+.alert-exit {
+  opacity: 1;
+}
+.alert-exit-active {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.themeChanger {
+  position: absolute;
+  top: 45px;
+  left: 35px;
+  cursor: pointer;
+} 
+.themeChanger img {
+  width: 5%;
+  display: block;
+  filter: invert(var(--invert));
+  transition: 0.3s ease;
+}
+

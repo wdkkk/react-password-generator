@@ -1,24 +1,269 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useRef } from "react";
+import Settings from "./components/Settings";
+import "./style.css";
+import { Button } from "@mui/joy";
+import PasswordsList from "./components/PasswordsList";
+import Alert from "@mui/joy/Alert";
+import AspectRatio from "@mui/joy/AspectRatio";
+import IconButton from "@mui/joy/IconButton";
+import Typography from "@mui/joy/Typography";
+import Check from "@mui/icons-material/Check";
+import Close from "@mui/icons-material/Close";
+import { CSSTransition } from "react-transition-group";
+import ThemeChanger from "./components/ThemeChanger";
+
+type FixMe = any;
+interface Parameter {
+  index: number;
+  name: string;
+  use: boolean;
+}
+interface Password {
+  isGenerated: boolean;
+  passwords: string[];
+}
+
+function getRandomInt(min: number, max: number) {
+  const minCeiled = Math.ceil(min);
+  const maxFloored = Math.floor(max);
+  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
+}
 
 function App() {
+  const defaultDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  // const [theme, setTheme] = useLocalStorage(
+  //   "theme",
+  //   defaultDark ? "dark" : "light"
+  // ); CHECK README
+  const [theme, setTheme] = useState("dark");
+  const changeTheme = () => setTheme(theme === "light" ? "dark" : "light");
+
+  const changeSettingsData = (newData: FixMe) => {
+    setSettingsData(newData);
+  };
+  const changePasswordSize = (newSize: number) => {
+    setPasswordSize(newSize);
+  };
+  const changeCopyAlertStatus = () => {
+    setAlertErrorStatus(false);
+    setTimeout(() => {
+      setAlertCopyStatus(true);
+    }, 500);
+
+    setTimeout(() => {
+      setAlertCopyStatus(false);
+    }, 3500);
+  };
+  const changeErrorAlertStatus = () => {
+    setAlertCopyStatus(false);
+    setTimeout(() => {
+      setAlertErrorStatus(true);
+    }, 500);
+
+    setTimeout(() => {
+      setAlertErrorStatus(false);
+    }, 3500);
+  };
+
+  const [settingsData, setSettingsData] = useState<Parameter[]>([
+    {
+      index: 0,
+      name: "Numbers",
+      use: true,
+    },
+    {
+      index: 1,
+      name: "Small letters",
+      use: true,
+    },
+    {
+      index: 2,
+      name: "Big letters",
+      use: true,
+    },
+    {
+      index: 3,
+      name: "Special symbols",
+      use: true,
+    },
+  ]);
+  const [passwordSize, setPasswordSize] = useState<number>(5);
+  const [generatedPasswords, setPasswords] = useState<Password>({
+    isGenerated: false,
+    passwords: [],
+  });
+  const [alertCopyStatus, setAlertCopyStatus] = useState<boolean>(false);
+  const [alerErrorStatus, setAlertErrorStatus] = useState<boolean>(false);
+
+  // fix that!!
+  const passwords = generatedPasswords.passwords;
+
+  const alertCopyNodeRef = useRef(null);
+  const alertErrorNodeRef = useRef(null);
+
+  const generatePassword = (settings: Parameter[], passSize: number) => {
+    const numbers = "0123456789";
+    const smallLetters = "abcdefghijklmnopqrstuvwxyz";
+    const bigLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const specSymbols = "%*).?@#$~";
+
+    let symbols = [numbers, smallLetters, bigLetters, specSymbols];
+    symbols = symbols.filter(
+      (el) => settings[symbols.indexOf(el)].use === true
+    );
+
+    if (symbols.length === 0) return changeErrorAlertStatus();
+
+    let passwords: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      let password: string = "";
+      for (let j = 0; j < passSize; j++) {
+        const typeOfSymbol = getRandomInt(0, symbols.length);
+        const indexOfSymbol = getRandomInt(0, symbols[typeOfSymbol].length);
+
+        password += symbols[typeOfSymbol][indexOfSymbol];
+      }
+      passwords = [...passwords, password];
+    }
+
+    console.log(passwords);
+    return passwords;
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <div className="app" data-theme={theme}>
+      <div className="container">
+        <Settings
+          changeSettingsData={changeSettingsData}
+          changePasswordSize={changePasswordSize}
+        />
+        <Button
+          variant="outlined"
+          style={{ marginBottom: 40 }}
+          onClick={(e) => {
+            const newPasswords = generatePassword(settingsData, passwordSize);
+            if (newPasswords)
+              setPasswords({
+                isGenerated: true,
+                passwords: [...newPasswords],
+              });
+            setAlertCopyStatus(false);
+          }}
         >
-          Learn React
-        </a>
-      </header>
+          Generate
+        </Button>
+        {generatedPasswords.isGenerated && (
+          <PasswordsList
+            changeAlertStatus={changeCopyAlertStatus}
+            passwords={passwords}
+          />
+        )}
+        <CSSTransition
+          in={alertCopyStatus}
+          nodeRef={alertCopyNodeRef}
+          timeout={400}
+          classNames="alert"
+          unmountOnExit
+          onEnter={() => setAlertCopyStatus(true)}
+          onExited={() => setAlertCopyStatus(false)}
+        >
+          <Alert
+            ref={alertCopyNodeRef}
+            size="lg"
+            color="success"
+            variant="solid"
+            invertedColors
+            startDecorator={
+              <AspectRatio
+                variant="solid"
+                ratio="1"
+                sx={{
+                  minWidth: 40,
+                  borderRadius: "50%",
+                  boxShadow: "0 2px 12px 0 rgb(0 0 0/0.2)",
+                }}
+              >
+                <div>
+                  <Check fontSize="medium" />
+                </div>
+              </AspectRatio>
+            }
+            endDecorator={
+              <IconButton
+                variant="plain"
+                sx={{
+                  "--IconButton-size": "32px",
+                  transform: "translate(0.5rem, -0.5rem)",
+                }}
+              >
+                <Close onClick={() => setAlertCopyStatus(false)} />
+              </IconButton>
+            }
+            sx={{ alignItems: "flex-start", overflow: "hidden" }}
+          >
+            <div>
+              <Typography level="title-lg">Copied</Typography>
+              <Typography level="body-sm">
+                Password was copied to clipboard
+              </Typography>
+            </div>
+          </Alert>
+        </CSSTransition>
+
+        <CSSTransition
+          in={alerErrorStatus}
+          nodeRef={alertErrorNodeRef}
+          timeout={400}
+          classNames="alert"
+          unmountOnExit
+          onEnter={() => setAlertErrorStatus(true)}
+          onExited={() => setAlertErrorStatus(false)}
+        >
+          <Alert
+            ref={alertErrorNodeRef}
+            size="lg"
+            color="danger"
+            variant="solid"
+            invertedColors
+            startDecorator={
+              <AspectRatio
+                variant="solid"
+                ratio="1"
+                sx={{
+                  minWidth: 40,
+                  borderRadius: "50%",
+                  boxShadow: "0 2px 12px 0 rgb(0 0 0/0.2)",
+                }}
+              >
+                <div>
+                  <Close fontSize="medium" />
+                </div>
+              </AspectRatio>
+            }
+            endDecorator={
+              <IconButton
+                variant="plain"
+                sx={{
+                  "--IconButton-size": "32px",
+                  transform: "translate(0.5rem, -0.5rem)",
+                }}
+              >
+                <Close onClick={() => setAlertErrorStatus(false)} />
+              </IconButton>
+            }
+            sx={{ alignItems: "flex-start", overflow: "hidden" }}
+          >
+            <div>
+              <Typography level="title-lg">
+                Password wasn't generated
+              </Typography>
+              <Typography level="body-sm">Settings is empty</Typography>
+            </div>
+          </Alert>
+        </CSSTransition>
+
+        <ThemeChanger changeTheme={changeTheme} />
+      </div>
     </div>
   );
 }
