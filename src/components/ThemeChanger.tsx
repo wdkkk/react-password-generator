@@ -1,7 +1,8 @@
 import React from "react";
 import Close from "@mui/icons-material/Close";
 
-const ThemeChanger = ({ changeTheme }: any) => {
+type PropsType = { changeTheme: () => void };
+const ThemeChanger = ({ changeTheme }: PropsType) => {
   return (
     <div className="themeChanger" onClick={() => changeTheme()}>
       <img

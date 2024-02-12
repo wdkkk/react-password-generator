@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import Settings from "./components/Settings";
 import "./style.css";
 import { Button } from "@mui/joy";
@@ -11,8 +11,8 @@ import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import { CSSTransition } from "react-transition-group";
 import ThemeChanger from "./components/ThemeChanger";
+import generatePasswords from "./hooks/generatePasswords";
 
-type FixMe = any;
 interface Parameter {
   index: number;
   name: string;
@@ -23,22 +23,11 @@ interface Password {
   passwords: string[];
 }
 
-function getRandomInt(min: number, max: number) {
-  const minCeiled = Math.ceil(min);
-  const maxFloored = Math.floor(max);
-  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
-}
-
 function App() {
-  const defaultDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  // const [theme, setTheme] = useLocalStorage(
-  //   "theme",
-  //   defaultDark ? "dark" : "light"
-  // ); CHECK README
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState("light");
   const changeTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
-  const changeSettingsData = (newData: FixMe) => {
+  const changeSettingsData = (newData: Parameter[]) => {
     setSettingsData(newData);
   };
   const changePasswordSize = (newSize: number) => {
@@ -87,6 +76,7 @@ function App() {
       use: true,
     },
   ]);
+
   const [passwordSize, setPasswordSize] = useState<number>(5);
   const [generatedPasswords, setPasswords] = useState<Password>({
     isGenerated: false,
@@ -95,40 +85,8 @@ function App() {
   const [alertCopyStatus, setAlertCopyStatus] = useState<boolean>(false);
   const [alerErrorStatus, setAlertErrorStatus] = useState<boolean>(false);
 
-  // fix that!!
-  const passwords = generatedPasswords.passwords;
-
   const alertCopyNodeRef = useRef(null);
   const alertErrorNodeRef = useRef(null);
-
-  const generatePassword = (settings: Parameter[], passSize: number) => {
-    const numbers = "0123456789";
-    const smallLetters = "abcdefghijklmnopqrstuvwxyz";
-    const bigLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const specSymbols = "%*).?@#$~";
-
-    let symbols = [numbers, smallLetters, bigLetters, specSymbols];
-    symbols = symbols.filter(
-      (el) => settings[symbols.indexOf(el)].use === true
-    );
-
-    if (symbols.length === 0) return changeErrorAlertStatus();
-
-    let passwords: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      let password: string = "";
-      for (let j = 0; j < passSize; j++) {
-        const typeOfSymbol = getRandomInt(0, symbols.length);
-        const indexOfSymbol = getRandomInt(0, symbols[typeOfSymbol].length);
-
-        password += symbols[typeOfSymbol][indexOfSymbol];
-      }
-      passwords = [...passwords, password];
-    }
-
-    console.log(passwords);
-    return passwords;
-  };
 
   return (
     <div className="app" data-theme={theme}>
@@ -141,12 +99,17 @@ function App() {
           variant="outlined"
           style={{ marginBottom: 40 }}
           onClick={(e) => {
-            const newPasswords = generatePassword(settingsData, passwordSize);
-            if (newPasswords)
-              setPasswords({
+            const newPasswords = generatePasswords(settingsData, passwordSize);
+            if (newPasswords) {
+              const obj = {
                 isGenerated: true,
                 passwords: [...newPasswords],
-              });
+              };
+
+              setPasswords(obj);
+            } else {
+              changeErrorAlertStatus();
+            }
             setAlertCopyStatus(false);
           }}
         >
@@ -155,7 +118,7 @@ function App() {
         {generatedPasswords.isGenerated && (
           <PasswordsList
             changeAlertStatus={changeCopyAlertStatus}
-            passwords={passwords}
+            passwords={generatedPasswords.passwords}
           />
         )}
         <CSSTransition
@@ -257,7 +220,7 @@ function App() {
               <Typography level="title-lg">
                 Password wasn't generated
               </Typography>
-              <Typography level="body-sm">Settings is empty</Typography>
+              <Typography level="body-sm">Settings are empty</Typography>
             </div>
           </Alert>
         </CSSTransition>

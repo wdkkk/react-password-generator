@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Checkbox from "@mui/joy/Checkbox";
 import Slider from "@mui/joy/Slider";
 
-type FixMe = any;
 type Error = "Error";
 interface Parameter {
   index: number;
@@ -13,9 +12,13 @@ function instanceOfCheckbox(object: any): object is Parameter {
   return true;
 }
 
-const Settings = ({ changeSettingsData, changePasswordSize }: FixMe) => {
+type PropsTypes = {
+  changeSettingsData: (newData: Parameter[]) => void;
+  changePasswordSize: (newSize: number) => void;
+};
+const Settings = ({ changeSettingsData, changePasswordSize }: PropsTypes) => {
   const [passwordSize, setPasswordSize] = useState<number>(5);
-  const [settingsData, setSettingsData] = useState([
+  const [settingsData, setSettingsData] = useState<Parameter[]>([
     {
       index: 0,
       name: "Numbers",
