@@ -1,6 +1,6 @@
 # About
 
-Simply password generator. Techologies: React.js (TypeScript), CSS, MUI (Joy UI)
+Simple password generator. Techologies: React.js (TypeScript), CSS, MUI (Joy UI)
 ![Preview](https://i.imgur.com/pArvfKz.png)
 
 ## Dev todo
