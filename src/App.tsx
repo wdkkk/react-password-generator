@@ -11,13 +11,8 @@ import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import { CSSTransition } from "react-transition-group";
 import ThemeChanger from "./components/ThemeChanger";
-import generatePasswords from "./hooks/generatePasswords";
-
-interface Parameter {
-  index: number;
-  name: string;
-  use: boolean;
-}
+import { SettingsParameter } from "./types/SettingsParameter";
+import { generatePasswords } from "./functions/generatePasswords";
 interface Password {
   isGenerated: boolean;
   passwords: string[];
@@ -27,7 +22,7 @@ function App() {
   const [theme, setTheme] = useState("light");
   const changeTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
-  const changeSettingsData = (newData: Parameter[]) => {
+  const changeSettingsData = (newData: SettingsParameter[]) => {
     setSettingsData(newData);
   };
   const changePasswordSize = (newSize: number) => {
@@ -54,7 +49,7 @@ function App() {
     }, 3500);
   };
 
-  const [settingsData, setSettingsData] = useState<Parameter[]>([
+  const [settingsData, setSettingsData] = useState<SettingsParameter[]>([
     {
       index: 0,
       name: "Numbers",

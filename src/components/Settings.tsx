@@ -1,24 +1,21 @@
 import React, { useEffect, useState } from "react";
 import Checkbox from "@mui/joy/Checkbox";
 import Slider from "@mui/joy/Slider";
+import { SettingsParameter } from "../types/SettingsParameter";
 
 type Error = "Error";
-interface Parameter {
-  index: number;
-  name: string;
-  use: boolean;
-}
-function instanceOfCheckbox(object: any): object is Parameter {
+
+function instanceOfCheckbox(object: any): object is SettingsParameter {
   return true;
 }
 
-type PropsTypes = {
-  changeSettingsData: (newData: Parameter[]) => void;
+type Props = {
+  changeSettingsData: (newData: SettingsParameter[]) => void;
   changePasswordSize: (newSize: number) => void;
 };
-const Settings = ({ changeSettingsData, changePasswordSize }: PropsTypes) => {
+const Settings = ({ changeSettingsData, changePasswordSize }: Props) => {
   const [passwordSize, setPasswordSize] = useState<number>(5);
-  const [settingsData, setSettingsData] = useState<Parameter[]>([
+  const [settingsData, setSettingsData] = useState<SettingsParameter[]>([
     {
       index: 0,
       name: "Numbers",
@@ -50,7 +47,7 @@ const Settings = ({ changeSettingsData, changePasswordSize }: PropsTypes) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checkboxIndex = parseInt(event.target.id[2]);
 
-    let currentSettingsDataElement: Parameter | Error = "Error";
+    let currentSettingsDataElement: SettingsParameter | Error = "Error";
     settingsData.findIndex((element) => {
       if (element.index === checkboxIndex) currentSettingsDataElement = element;
     });

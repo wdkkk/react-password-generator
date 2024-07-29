@@ -1,8 +1,8 @@
-type PropsTypes = {
+type Props = {
   passwords: string[];
   changeAlertStatus: () => void;
 };
-const PasswordsList = ({ passwords, changeAlertStatus }: PropsTypes) => {
+const PasswordsList = ({ passwords, changeAlertStatus }: Props) => {
   return (
     <div className="passwords-list">
       <div className="title">Passwords:</div>
