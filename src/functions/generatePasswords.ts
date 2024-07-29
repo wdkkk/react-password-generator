@@ -20,8 +20,9 @@ export const generatePasswords = (settingsData: SettingsParameter[], passwordSiz
     if (settings.use) allowedSymbols.push( allSymbols[settings.index] )
   })
 
+  if (allowedSymbols.length === 0) return false
 
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 5; i++) {
     let password = ''
     for (let i = 0; i < passwordSize; i++) {
       const symbolType = getRandomSymbolType(allowedSymbols)
