@@ -1,6 +1,11 @@
 import { useState, useRef } from "react";
-import Settings from "./components/Settings";
+import { useSpring, animated } from "@react-spring/web";
+
 import "./style.css";
+
+import Settings from "./components/Settings";
+import ThemeChanger from "./components/ThemeChanger";
+
 import { Button } from "@mui/joy";
 import PasswordsList from "./components/PasswordsList";
 import Alert from "@mui/joy/Alert";
@@ -10,9 +15,12 @@ import Typography from "@mui/joy/Typography";
 import Check from "@mui/icons-material/Check";
 import Close from "@mui/icons-material/Close";
 import { CSSTransition } from "react-transition-group";
-import ThemeChanger from "./components/ThemeChanger";
-import { SettingsParameter } from "./types/SettingsParameter";
-import { generatePasswords } from "./functions/generatePasswords";
+
+import { ISettingsParameter } from "./types";
+
+import { generatePasswords } from "./utils/generatePasswords";
+import { INITIAL_SETTINGS_DATA } from "./utils/constants";
+
 interface Password {
   isGenerated: boolean;
   passwords: string[];
@@ -22,55 +30,36 @@ function App() {
   const [theme, setTheme] = useState("light");
   const changeTheme = () => setTheme(theme === "light" ? "dark" : "light");
 
-  const changeSettingsData = (newData: SettingsParameter[]) => {
+  const changeSettingsData = (newData: ISettingsParameter[]) => {
     setSettingsData(newData);
   };
   const changePasswordSize = (newSize: number) => {
     setPasswordSize(newSize);
   };
   const changeCopyAlertStatus = () => {
-    setAlertErrorStatus(false);
+    setAlertCopyStatus(false);
     setTimeout(() => {
       setAlertCopyStatus(true);
-    }, 500);
+    }, 100);
 
     setTimeout(() => {
       setAlertCopyStatus(false);
     }, 3500);
   };
   const changeErrorAlertStatus = () => {
-    setAlertCopyStatus(false);
+    setAlertErrorStatus(false);
     setTimeout(() => {
       setAlertErrorStatus(true);
-    }, 500);
+    }, 100);
 
     setTimeout(() => {
       setAlertErrorStatus(false);
     }, 3500);
   };
 
-  const [settingsData, setSettingsData] = useState<SettingsParameter[]>([
-    {
-      index: 0,
-      name: "Numbers",
-      use: true,
-    },
-    {
-      index: 1,
-      name: "Small letters",
-      use: true,
-    },
-    {
-      index: 2,
-      name: "Big letters",
-      use: true,
-    },
-    {
-      index: 3,
-      name: "Special symbols",
-      use: true,
-    },
-  ]);
+  const [settingsData, setSettingsData] = useState<ISettingsParameter[]>(
+    INITIAL_SETTINGS_DATA
+  );
 
   const [passwordSize, setPasswordSize] = useState<number>(5);
   const [generatedPasswords, setPasswords] = useState<Password>({
@@ -78,7 +67,14 @@ function App() {
     passwords: [],
   });
   const [alertCopyStatus, setAlertCopyStatus] = useState<boolean>(false);
-  const [alerErrorStatus, setAlertErrorStatus] = useState<boolean>(false);
+  const [alertErrorStatus, setAlertErrorStatus] = useState<boolean>(false);
+
+  const fadeIn = useSpring({
+    opacity: generatedPasswords.isGenerated ? 1 : 0,
+    transform: generatedPasswords.isGenerated
+      ? "translateY(0)"
+      : "translateY(-20px)",
+  });
 
   const alertCopyNodeRef = useRef(null);
   const alertErrorNodeRef = useRef(null);
@@ -111,10 +107,12 @@ function App() {
           Generate
         </Button>
         {generatedPasswords.isGenerated && (
-          <PasswordsList
-            changeAlertStatus={changeCopyAlertStatus}
-            passwords={generatedPasswords.passwords}
-          />
+          <animated.div style={fadeIn}>
+            <PasswordsList
+              changeAlertStatus={changeCopyAlertStatus}
+              passwords={generatedPasswords.passwords}
+            />
+          </animated.div>
         )}
         <CSSTransition
           in={alertCopyStatus}
@@ -157,7 +155,13 @@ function App() {
                 <Close onClick={() => setAlertCopyStatus(false)} />
               </IconButton>
             }
-            sx={{ alignItems: "flex-start", overflow: "hidden" }}
+            sx={{
+              alignItems: "flex-start",
+              overflow: "hidden",
+              position: "absolute",
+              bottom: 20,
+              width: "800px",
+            }}
           >
             <div>
               <Typography level="title-lg">Copied</Typography>
@@ -169,7 +173,7 @@ function App() {
         </CSSTransition>
 
         <CSSTransition
-          in={alerErrorStatus}
+          in={alertErrorStatus}
           nodeRef={alertErrorNodeRef}
           timeout={400}
           classNames="alert"
@@ -209,7 +213,13 @@ function App() {
                 <Close onClick={() => setAlertErrorStatus(false)} />
               </IconButton>
             }
-            sx={{ alignItems: "flex-start", overflow: "hidden" }}
+            sx={{
+              alignItems: "flex-start",
+              overflow: "hidden",
+              position: "absolute",
+              bottom: 20,
+              width: "800px",
+            }}
           >
             <div>
               <Typography level="title-lg">

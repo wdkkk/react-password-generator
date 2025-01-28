@@ -1,6 +1,3 @@
-import React from "react";
-import Close from "@mui/icons-material/Close";
-
 type PropsType = { changeTheme: () => void };
 const ThemeChanger = ({ changeTheme }: PropsType) => {
   return (

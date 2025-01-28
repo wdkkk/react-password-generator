@@ -1,42 +1,30 @@
 import React, { useEffect, useState } from "react";
+
 import Checkbox from "@mui/joy/Checkbox";
 import Slider from "@mui/joy/Slider";
-import { SettingsParameter } from "../types/SettingsParameter";
+
+import { useSpring, animated } from "@react-spring/web";
+
+import { ISettingsParameter } from "../types";
+
+import { INITIAL_SETTINGS_DATA } from "../utils/constants";
 
 type Error = "Error";
 
-function instanceOfCheckbox(object: any): object is SettingsParameter {
+function instanceOfCheckbox(object: any): object is ISettingsParameter {
   return true;
 }
 
 type Props = {
-  changeSettingsData: (newData: SettingsParameter[]) => void;
+  changeSettingsData: (newData: ISettingsParameter[]) => void;
   changePasswordSize: (newSize: number) => void;
 };
 const Settings = ({ changeSettingsData, changePasswordSize }: Props) => {
   const [passwordSize, setPasswordSize] = useState<number>(5);
-  const [settingsData, setSettingsData] = useState<SettingsParameter[]>([
-    {
-      index: 0,
-      name: "Numbers",
-      use: true,
-    },
-    {
-      index: 1,
-      name: "Small letters",
-      use: true,
-    },
-    {
-      index: 2,
-      name: "Big letters",
-      use: true,
-    },
-    {
-      index: 3,
-      name: "Special symbols",
-      use: true,
-    },
-  ]);
+  const [settingsData, setSettingsData] = useState<ISettingsParameter[]>(
+    INITIAL_SETTINGS_DATA
+  );
+  const spring = useSpring({ passwordSize });
 
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
     if (typeof newValue == "number") {
@@ -47,9 +35,14 @@ const Settings = ({ changeSettingsData, changePasswordSize }: Props) => {
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checkboxIndex = parseInt(event.target.id[2]);
 
-    let currentSettingsDataElement: SettingsParameter | Error = "Error";
-    settingsData.findIndex((element) => {
-      if (element.index === checkboxIndex) currentSettingsDataElement = element;
+    let currentSettingsDataElement: ISettingsParameter | Error = "Error";
+
+    settingsData.findIndex((element): boolean => {
+      if (element.index === checkboxIndex) {
+        currentSettingsDataElement = element;
+        return true;
+      }
+      return false;
     });
 
     if (instanceOfCheckbox(currentSettingsDataElement)) {
@@ -64,7 +57,7 @@ const Settings = ({ changeSettingsData, changePasswordSize }: Props) => {
 
   useEffect(() => {
     changeSettingsData(settingsData);
-  }, [settingsData]);
+  }, [changeSettingsData, settingsData]);
 
   return (
     <div className="settings">
@@ -73,7 +66,6 @@ const Settings = ({ changeSettingsData, changePasswordSize }: Props) => {
       <div className="settings-column">
         {settingsData.map((parameter) => (
           <Checkbox
-            defaultChecked
             label={parameter.name}
             checked={parameter.use}
             key={parameter.index}
@@ -85,10 +77,14 @@ const Settings = ({ changeSettingsData, changePasswordSize }: Props) => {
       </div>
 
       <div className="settings__size">
-        Password size: {passwordSize}.
+        Password size:{" "}
+        <animated.span>
+          {spring.passwordSize.to((n) => n.toFixed(0))}
+        </animated.span>
+        .
         <Slider
           defaultValue={passwordSize}
-          min={5}
+          min={8}
           max={35}
           valueLabelDisplay="auto"
           value={passwordSize}
